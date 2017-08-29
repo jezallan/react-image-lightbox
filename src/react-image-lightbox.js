@@ -1131,6 +1131,11 @@ class ReactImageLightbox extends Component {
             if (props[type] && !this.isImageLoaded(props[type])) {
                 this.loadImage(type, props[type], generateLoadDoneCallback(type, props[type]));
             }
+
+
+            if (props[type] && typeof props[type] === 'string' && !this.isImageLoaded(props[type])) {
+                this.loadImage(type, props[type], generateLoadDoneCallback(type, props[type]));
+            }
         });
     }
 
@@ -1264,8 +1269,8 @@ class ReactImageLightbox extends Component {
             keyEndings[name] = keyEnding;
         });
 
-        // Images to be displayed
-        const images = [];
+        // Items to be displayed
+        const displayItems = [];
         const addImage = (srcType, imageClass, baseStyle = {}) => {
             // Ignore types that have no source defined for their full size image
             if (!this.props[srcType]) {
@@ -1306,7 +1311,7 @@ class ReactImageLightbox extends Component {
                 }
 
                 // Fall back to loading icon if the thumbnail has not been loaded
-                images.push(
+                displayItems.push(
                     <div
                         className={`${imageClass} ${styles.image} ril-not-loaded`}
                         style={imageStyle}
@@ -1327,7 +1332,7 @@ class ReactImageLightbox extends Component {
             const imageSrc = bestImageInfo.src;
             if (discourageDownloads) {
                 imageStyle.backgroundImage = `url('${imageSrc}')`;
-                images.push(
+                displayItems.push(
                     <div
                         className={`${imageClass} ${styles.image} ${styles.imageDiscourager}`}
                         onDoubleClick={this.handleImageDoubleClick}
@@ -1339,7 +1344,7 @@ class ReactImageLightbox extends Component {
                     </div>
                 );
             } else {
-                images.push(
+                displayItems.push(
                     <img
                         className={`${imageClass} ${styles.image}`}
                         onDoubleClick={this.handleImageDoubleClick}
@@ -1355,15 +1360,50 @@ class ReactImageLightbox extends Component {
             }
         };
 
+
+        const addComponent = (srcType, imageClass, baseStyle = {}) => {
+            const imageStyle = { ...baseStyle, ...transitionStyle };
+            let DisplayItem = this.props[srcType];
+
+            displayItems.push(
+                <div
+                    className={`${imageClass} ${styles.image}`}
+                    onDoubleClick={this.handleImageDoubleClick}
+                    onWheel={this.handleImageMouseWheel}
+                    onDragStart={e => e.preventDefault()}
+                    style={imageStyle}
+                    key={keyEndings[srcType]}
+                    draggable={false}
+                >
+                    <DisplayItem />
+                </div>
+            );
+        };
+
+        const addItem = (srcType, imageClass, baseStyle = {}) => {
+            const DisplayItem = this.props[srcType];
+
+            if (!DisplayItem) {
+                return;
+            }
+
+            if (typeof DisplayItem === 'string') {
+                addImage(srcType, imageClass, baseStyle);
+            } else {
+                addComponent(srcType, imageClass, baseStyle);
+            }
+        };
+
+
         const zoomMultiplier = this.getZoomMultiplier();
         // Next Image (displayed on the right)
-        addImage(
+        addItem(
             'nextSrc',
             `ril-image-next ${styles.imageNext}`,
             ReactImageLightbox.getTransform({ x: boxSize.width })
         );
         // Main Image
-        addImage(
+        addItem(
             'mainSrc',
             'ril-image-current',
             ReactImageLightbox.getTransform({
@@ -1373,7 +1413,7 @@ class ReactImageLightbox extends Component {
             })
         );
         // Previous Image (displayed on the left)
-        addImage(
+        addItem(
             'prevSrc',
             `ril-image-prev ${styles.imagePrev}`,
             ReactImageLightbox.getTransform({ x: -1 * boxSize.width })
@@ -1466,7 +1506,7 @@ class ReactImageLightbox extends Component {
                         className={`ril-inner ${styles.inner}`}
                         onClick={clickOutsideToClose ? this.closeIfClickInner : noop}
                     >
-                        {images}
+                        {displayItems}
                     </div>
 
                     {prevSrc &&
@@ -1571,16 +1611,28 @@ ReactImageLightbox.propTypes = {
     //-----------------------------
 
     // Main display image url
-    mainSrc: PropTypes.string.isRequired, // eslint-disable-line react/no-unused-prop-types
+    mainSrc: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.func
+    ]), // eslint-disable-line react/no-unused-prop-types
 
     // Previous display image url (displayed to the left)
     // If left undefined, movePrev actions will not be performed, and the button not displayed
-    prevSrc: PropTypes.string,
+    prevSrc: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.func
+    ]),
 
     // Next display image url (displayed to the right)
     // If left undefined, moveNext actions will not be performed, and the button not displayed
-    nextSrc: PropTypes.string,
+    nextSrc: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.func
+    ]),
 
+    // Previous display image url (displayed to the left)
+    // If left undefined, movePrev actions will not be performed, and the button not displayed
+    //
     //-----------------------------
     // Image thumbnail sources
     //-----------------------------
