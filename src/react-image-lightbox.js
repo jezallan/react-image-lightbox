@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
-Modal.setAppElement('#___gatsby');
 import {
     translate,
     getWindowWidth,
@@ -1479,6 +1478,7 @@ class ReactImageLightbox extends Component {
                 }}
                 style={modalStyle}
                 contentLabel={translate('Lightbox')}
+                ariaHideApp={false}
             >
                 <div // eslint-disable-line jsx-a11y/no-static-element-interactions
                     // Floating modal with closing animations
