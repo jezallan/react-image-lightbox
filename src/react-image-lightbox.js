@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
+Modal.setAppElement('#___gatsby');
 import {
     translate,
     getWindowWidth,
@@ -1464,7 +1465,6 @@ class ReactImageLightbox extends Component {
                 ...reactModalStyle.content, // Allow style overrides via props
             },
         };
-        Modal.setAppElement('body');
         return (
             <Modal
                 isOpen
