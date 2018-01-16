@@ -1464,7 +1464,7 @@ class ReactImageLightbox extends Component {
                 ...reactModalStyle.content, // Allow style overrides via props
             },
         };
-
+        Modal.setAppElement('body');
         return (
             <Modal
                 isOpen
